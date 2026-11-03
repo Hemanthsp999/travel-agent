@@ -1,0 +1,45 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	receive(receive)
+	understand(understand)
+	validate(validate)
+	ask_user(ask_user)
+	general_query(general_query)
+	select_tool(select_tool)
+	execute_tool(execute_tool)
+	process_result(process_result)
+	confirm(confirm)
+	respond(respond)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> receive;
+	ask_user --> understand;
+	confirm -.-> respond;
+	confirm -.-> select_tool;
+	confirm -.-> understand;
+	execute_tool --> process_result;
+	general_query -.-> ask_user;
+	general_query -.-> respond;
+	general_query -.-> select_tool;
+	process_result -.-> confirm;
+	process_result -.-> general_query;
+	process_result -.-> respond;
+	process_result -.-> select_tool;
+	process_result -.-> validate;
+	receive --> understand;
+	select_tool --> execute_tool;
+	understand -.-> general_query;
+	understand -.-> respond;
+	understand -.-> select_tool;
+	understand -.-> validate;
+	validate -.-> ask_user;
+	validate -.-> respond;
+	validate -.-> select_tool;
+	respond --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

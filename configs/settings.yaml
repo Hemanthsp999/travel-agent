@@ -1,0 +1,29 @@
+hotel_api:
+  base_url: http://localhost:8001     # env: HOTEL_API_BASE_URL
+  connect_timeout_s: 3.0
+  read_timeout_s: 8.0
+  max_attempts: 2                     # total tries for a booking whose outcome is unknown (same Idempotency-Key)
+  retry_backoff_s: 0.5
+
+flight_api:
+  base_url: http://localhost:8002     # env: FLIGHT_API_BASE_URL
+  connect_timeout_s: 3.0
+  read_timeout_s: 8.0
+  max_attempts: 2                     # total tries for a booking whose outcome is unknown (same Idempotency-Key)
+  retry_backoff_s: 0.5
+
+agent:
+  max_hotels_shown: 3                 # options shown in chat; user can ask "show all"
+  max_flights_shown: 4                # flights shown in chat; user can ask "show all"
+  max_ask_attempts: 3                 # re-asks for the same missing field before giving up
+  recursion_limit: 40
+  history_keep_messages: 12           # older messages are pruned; structured facts stay in state
+  use_llm: true                       # false = rule-based understanding only
+  llm_confidence_threshold: 0.5
+
+memory:
+  checkpoint_db: data/checkpoints.db  # SQLite checkpointer; falls back to in-memory
+
+graph:
+  artifacts_dir: artifacts
+  remote_png: true                    # try mermaid.ink first, then local Pillow rendering

@@ -1,0 +1,12 @@
+# Local llama.cpp model settings. Override any value with env vars (see travel_agent/config.py).
+model_path: ~/.models/Phi-3.5-mini-instruct.Q4_K_M.gguf # instruction-tuned, ChatML, good JSON output, 32k native ctx
+n_ctx: 4096
+n_threads: 0          # 0 = use all CPU cores
+n_batch: 256
+use_mmap: true
+verbose: false
+temperature:
+  routing: 0.0        # intent classification / extraction (deterministic)
+  reply: 0.7          # reserved for free-text phrasing (not used for facts)
+max_tokens:
+  routing: 160

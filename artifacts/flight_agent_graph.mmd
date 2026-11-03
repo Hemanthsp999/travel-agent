@@ -1,0 +1,54 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	receive(receive)
+	understand(understand)
+	validate(validate)
+	ask_user(ask_user)
+	general_query(general_query)
+	search_flights(search_flights)
+	check_seats(check_seats)
+	lookup_booking(lookup_booking)
+	confirm(confirm)
+	book_flight(book_flight)
+	cancel_flight(cancel_flight)
+	respond(respond)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> receive;
+	ask_user --> understand;
+	book_flight -.-> respond;
+	book_flight -.-> validate;
+	cancel_flight -.-> respond;
+	cancel_flight -.-> validate;
+	check_seats -.-> respond;
+	check_seats -.-> validate;
+	confirm -.-> book_flight;
+	confirm -.-> cancel_flight;
+	confirm -.-> respond;
+	confirm -.-> understand;
+	general_query -.-> ask_user;
+	general_query -.-> respond;
+	lookup_booking -.-> confirm;
+	lookup_booking -.-> respond;
+	lookup_booking -.-> validate;
+	receive --> understand;
+	search_flights -.-> respond;
+	search_flights -.-> validate;
+	understand -.-> book_flight;
+	understand -.-> general_query;
+	understand -.-> respond;
+	understand -.-> validate;
+	validate -.-> ask_user;
+	validate -.-> check_seats;
+	validate -.-> confirm;
+	validate -.-> lookup_booking;
+	validate -.-> respond;
+	validate -.-> search_flights;
+	respond --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
