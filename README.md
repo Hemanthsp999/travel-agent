@@ -8,6 +8,52 @@ The adapter maps their different result models to a common status/data/error res
 both domains fans out to the two agents concurrently; results are then combined without claiming success
 unless the agents returned it. Ambiguous booking or cancellation requests receive a domain clarification.
 
+### Shared FAQ and policy retrieval
+
+The supervisor runs a shared FAISS retrieval step before routing. FAQ and general hotel/flight policy
+questions are answered from the indexed mock knowledge base without invoking a booking subagent.
+Hotel and flight rules and cancellation terms are indexed per entity read from the mock API databases;
+the generated sample policies are illustrative and can differ by hotel, flight, or fare. For bookings,
+lookups, enquiries, and cancellation actions, the supervisor still calls the relevant subagent and
+forwards matching retrieved context in its task.
+Follow-up policy questions reuse the last retrieved match in the same conversation. Refund eligibility
+is not inferred from policy text alone; when booking dates or rate/fare details are missing, the assistant
+states the relevant conditions and asks for the information needed to check.
+
+The index is built once per process from `data/hotel.db` and `data/flight.db` (or the configured mock
+database paths); seed data is used if a database has not been initialized yet. `faiss-cpu` is installed
+through `requirements.txt`.
+
+### ReAct architecture implemented
+
+This project follows the ReAct cancellation flow shown in the architecture image:
+
+```mermaid
+flowchart TD
+    A[User Request] --> B[Observe]
+    B --> C[Decide]
+    C --> D{Booking identifiable?}
+    D -- No --> E[Ask for Booking Details]
+    D -- Yes --> F[Check Cancellation Policy]
+    F --> G[Flight / Hotel Subagent]
+    G --> H[Re-observe]
+    H --> I[Present Fees and Refund]
+    I --> J{User confirms?}
+    J -- No --> K[Stop Cancellation]
+    J -- Yes --> L[Execute Cancellation]
+    L --> M[Subagent]
+    M --> N[Verify Cancellation Result]
+    N --> O{Successful?}
+    O -- Yes --> P[Update State and Respond]
+    O -- No --> Q[Report Failure / Partial Result]
+    P --> R[END]
+    Q --> R
+    K --> R
+    E --> R
+```
+
+The active implementation is the supervisor in `travel_agent/orchestrator/graph.py`, with the ReAct state in `travel_agent/orchestrator/state.py` and the routing prompt in `travel_agent/prompts/orchestrator.md`.
+
 Each supervisor conversation needs a stable `thread_id`. It checkpoints routing history and pending
 domains, and gives each subagent a separate `{thread_id}:hotel` or `{thread_id}:flight` thread so its
 own graph can resume questions and confirmations. The default checkpointing is in-memory. For restart

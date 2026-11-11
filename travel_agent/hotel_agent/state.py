@@ -42,6 +42,10 @@ class HotelAgentState(TypedDict, total=False):
     force_stage: str | None
     next: str
 
+    # Knowledge-injected context from retrieval layer
+    retrieved_context: str | None  # Retrieved knowledge relevant to this task
+    retrieval_metadata: dict[str, Any] | None  # {"confidence", "sources", "domain", ...}
+
     # outcome
     outcome: dict[str, Any]
     result: dict[str, Any]

@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import sqlite3
+from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, Query, Response
+from fastapi import APIRouter, Depends, Header, Query, Request, Response
+from pydantic import ValidationError
+
+from mock_apis.common.errors import APIError
 
 from mock_apis.common.schemas import ERROR_RESPONSES, ApiResponse
 from mock_apis.hotel_api import service
@@ -40,8 +44,34 @@ def health() -> ApiResponse[HealthOut]:
     description="Returns hotels in a city with enough rooms free on every night of the stay.",
 )
 def search_hotels(
-    params: Annotated[HotelSearchParams, Query()], conn: Conn, settings: Settings
+    request: Request,
+    conn: Conn,
+    settings: Settings,
+    city: str = Query(..., min_length=2, max_length=60),
+    check_in: date = Query(...),
+    check_out: date = Query(...),
+    guests: int = Query(1, ge=1),
+    rooms: int = Query(1, ge=1),
+    min_rating: float | None = Query(None, ge=0, le=5),
+    max_price_per_night: int | None = Query(None, gt=0),
 ) -> ApiResponse[HotelSearchResult]:
+    allowed = {"city", "check_in", "check_out", "guests", "rooms", "min_rating", "max_price_per_night"}
+    extra = sorted(set(request.query_params.keys()) - allowed)
+    if extra:
+        raise APIError(422, "VALIDATION_ERROR", "The request is invalid.", [{"field": field, "message": "Unexpected query parameter"} for field in extra])
+    try:
+        params = HotelSearchParams(
+            city=city,
+            check_in=check_in,
+            check_out=check_out,
+            guests=guests,
+            rooms=rooms,
+            min_rating=min_rating,
+            max_price_per_night=max_price_per_night,
+        )
+    except ValidationError as exc:
+        details = [{"field": ".".join(str(part) for part in err["loc"] if part not in ("query",)), "message": str(err["msg"])} for err in exc.errors()]
+        raise APIError(422, "VALIDATION_ERROR", "The request is invalid.", details) from exc
     result = service.search_hotels(conn, settings, params)
     message = (
         f"Found {result.count} hotel(s) in {result.city}."

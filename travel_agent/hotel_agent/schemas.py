@@ -47,6 +47,7 @@ class HotelTask(BaseModel):
     thread_id: str = Field("default", description="Conversation key; the same id continues the same dialogue")
     intent: Intent | None = Field(None, description="Optional pre-classified intent (skips classification)")
     params: dict[str, Any] = Field(default_factory=dict, description="Optional pre-extracted parameters")
+    context: dict[str, Any] | None = Field(None, description="Optional context from retrieval layer or other sources")
 
 
 class HotelTaskResult(BaseModel):

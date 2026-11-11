@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from typing import Annotated, Any, TypedDict
 
+
 def _merge(left: dict | None, right: dict | None) -> dict:
     return {**(left or {}), **(right or {})}
 
@@ -14,7 +15,11 @@ class OrchestratorState(TypedDict, total=False):
     identified_domains: list[str]
     requested_operations: list[str]
     execution_plan: dict[str, Any]
+    semantic_slots: dict[str, Any]
     selected_subagents: list[str]
+    # Retrieval-injected context for subagents
+    retrieved_knowledge: dict[str, Any]  # {"domain": ..., "context": ..., "source_refs": [...], "confidence": ...}
+    knowledge_query: bool
     hotel_task_status: str
     flight_task_status: str
     hotel_result: dict[str, Any] | None
@@ -24,3 +29,7 @@ class OrchestratorState(TypedDict, total=False):
     execution_status: str
     final_response: str
     pending_domains: list[str]
+    loop_count: int
+    next_action: str
+    iteration_limit: int
+    supervisor_prompt: str

@@ -15,8 +15,11 @@ def make_receive(deps: AgentDeps):
 
     def receive(state: HotelAgentState) -> dict[str, Any]:
         params = {k: v for k, v in (state.get("params") or {}).items() if k not in TASK_SCOPED}
+        context = (state.get("task") or {}).get("context") or {}
         return {
             "params": params,
+            "retrieved_context": context.get("retrieved_context"),
+            "retrieval_metadata": context.get("retrieval_metadata"),
             "intent": "",
             "general_topic": "NONE",
             "missing_params": [],

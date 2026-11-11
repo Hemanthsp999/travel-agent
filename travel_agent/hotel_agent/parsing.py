@@ -25,6 +25,25 @@ _ORD = r"(?:st|nd|rd|th)?"
 _SEP = r"\s*(?:-|–|to|till|until|through)\s*"
 _YEAR = r"(?:,?\s*(?P<y>\d{4}))?"
 
+_RELATIVE_DATE_VARIANTS = {
+    "day after tommorow": "day after tomorrow",
+    "day after tomorow": "day after tomorrow",
+    "day after tommorrow": "day after tomorrow",
+    "tommorrow": "tomorrow",
+    "tommorow": "tomorrow",
+    "tomorow": "tomorrow",
+    "tomoro": "tomorrow",
+    "tmrw": "tomorrow",
+}
+
+
+def _normalize_relative_dates(text: str) -> str:
+    normalized = text
+    for bad, good in _RELATIVE_DATE_VARIANTS.items():
+        normalized = re.sub(rf"\b{re.escape(bad)}\b", good, normalized, flags=re.I)
+    return normalized
+
+
 _DATE_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"(?P<y>\d{4})-(?P<m>\d{1,2})-(?P<d>\d{1,2})"),
     re.compile(rf"(?P<d1>\d{{1,2}}){_ORD}{_SEP}(?P<d2>\d{{1,2}}){_ORD}\s+(?:of\s+)?(?P<m>{_MONTH})\b\.?{_YEAR}", re.I),
@@ -79,10 +98,11 @@ def _resolve(day: int, month: int, year: int | None, today: date) -> date | None
 
 def parse_dates(text: str, today: date) -> tuple[list[date], list[tuple[int, int]]]:
     """Return dates in textual order plus the character spans they came from."""
+    normalized = _normalize_relative_dates(text)
     found: list[tuple[int, date]] = []
     spans: list[tuple[int, int]] = []
     for pattern in _DATE_PATTERNS:
-        for match in pattern.finditer(text):
+        for match in pattern.finditer(normalized):
             span = match.span()
             if _overlaps(span, spans):
                 continue

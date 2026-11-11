@@ -59,6 +59,10 @@ class FlightAgentState(TypedDict, total=False):
     invite_booking: bool  # a search was triggered by a booking request: ask which flight to book
     next: str
 
+    # Knowledge-injected context from retrieval layer
+    retrieved_context: str | None  # Retrieved knowledge relevant to this task
+    retrieval_metadata: dict[str, Any] | None  # {"confidence", "sources", "domain", ...}
+
     # outcome
     api_execution_status: str  # ExecutionStatus value of the last API-backed step
     booking_details: dict[str, Any] | None

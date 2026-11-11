@@ -14,8 +14,11 @@ def make_receive(deps: AgentDeps):
     keep = deps.settings.agent.history_keep_messages
 
     def receive(state: FlightAgentState) -> dict[str, Any]:
+        context = (state.get("task") or {}).get("context") or {}
         return {
             **TASK_SCOPED,
+            "retrieved_context": context.get("retrieved_context"),
+            "retrieval_metadata": context.get("retrieval_metadata"),
             "user_request": last_user_text(state["messages"]),
             "identified_intent": "",
             "general_topic": "NONE",

@@ -50,7 +50,8 @@ _PHONE_RE = re.compile(r"(?<![\w.])\+?\d[\d\s\-()]{8,18}\d(?![\w])")
 # ------------------------------------------------------------------------------- places
 
 _PLACE_STOP = {
-    "on", "for", "at", "in", "next", "this", "coming", "tomorrow", "today", "tonight", "with", "under", "by",
+    "on", "for", "at", "in", "next", "this", "coming", "tomorrow", "tommorrow", "tommorow", "tomorow",
+    "tomoro", "tmrw", "today", "tonight", "with", "under", "by",
     "around", "the", "and", "please", "pls", "to", "from", "leaving", "departing", "flight", "flights", "ticket",
     "tickets", "airport", "a", "an", "my", "me", "us", "one", "two", "three", "four", "five", "six", "seven",
     "eight", "nine", "passengers", "passenger", "people", "person", "adults", "adult", "travellers", "pax",

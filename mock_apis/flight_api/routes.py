@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import sqlite3
+from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, Query, Response
+from fastapi import APIRouter, Depends, Header, Query, Request, Response
+from pydantic import ValidationError
+
+from mock_apis.common.errors import APIError
 
 from mock_apis.common.schemas import ERROR_RESPONSES, ApiResponse
 from mock_apis.flight_api import service
@@ -39,8 +43,28 @@ def health() -> ApiResponse[HealthOut]:
     description="One-way search. Returns flights on the route with enough free seats for all passengers.",
 )
 def search_flights(
-    params: Annotated[FlightSearchParams, Query()], conn: Conn, settings: Settings
+    request: Request,
+    conn: Conn,
+    settings: Settings,
+    origin: str = Query(..., min_length=2, max_length=60),
+    destination: str = Query(..., min_length=2, max_length=60),
+    departure_date: date = Query(...),
+    passengers: int = Query(1, ge=1),
 ) -> ApiResponse[FlightSearchResult]:
+    allowed = {"origin", "destination", "departure_date", "passengers"}
+    extra = sorted(set(request.query_params.keys()) - allowed)
+    if extra:
+        raise APIError(422, "VALIDATION_ERROR", "The request is invalid.", [{"field": field, "message": "Unexpected query parameter"} for field in extra])
+    try:
+        params = FlightSearchParams(
+            origin=origin,
+            destination=destination,
+            departure_date=departure_date,
+            passengers=passengers,
+        )
+    except ValidationError as exc:
+        details = [{"field": ".".join(str(part) for part in err["loc"] if part not in ("query",)), "message": str(err["msg"])} for err in exc.errors()]
+        raise APIError(422, "VALIDATION_ERROR", "The request is invalid.", details) from exc
     result = service.search_flights(conn, settings, params)
     message = (
         f"Found {result.count} flight(s) from {result.origin} to {result.destination}."

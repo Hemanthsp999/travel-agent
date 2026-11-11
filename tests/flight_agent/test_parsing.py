@@ -42,8 +42,14 @@ def test_place_normalisation() -> None:
 def test_dates_are_parsed_by_code() -> None:
     assert extract("on 12 Nov", TODAY).departure_date == date(2026, 11, 12)
     assert extract("tomorrow", TODAY).departure_date == date(2026, 11, 3)
+    assert extract("tommorow", TODAY).departure_date == date(2026, 11, 3)
     assert extract("2026-12-05", TODAY).departure_date == date(2026, 12, 5)
     assert extract("sometime soon", TODAY).departure_date is None
+
+
+def test_route_parsing_strips_date_typos_from_city_names() -> None:
+    text = "Hi, I'm looking for flights from Bengaluru to mumbai tommorow, get me tickets"
+    assert parse_route(text) == ("Bangalore", "Mumbai")
 
 
 def test_two_dates_are_flagged_instead_of_picking_silently() -> None:

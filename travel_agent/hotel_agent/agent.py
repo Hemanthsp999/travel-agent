@@ -81,7 +81,11 @@ class HotelAgent:
         config = self._config(task.thread_id)
         if self.graph.get_state(config).next:  # paused on a question: this message is the answer
             return Command(resume=task.message)
-        hints = {"intent": task.intent.value if task.intent else None, "params": task.params}
+        hints = {
+            "intent": task.intent.value if task.intent else None,
+            "params": task.params,
+            "context": task.context or {},
+        }
         return {"messages": [HumanMessage(content=task.message)], "task": hints}
 
     def _events(self, task: HotelTask) -> Iterator[str]:

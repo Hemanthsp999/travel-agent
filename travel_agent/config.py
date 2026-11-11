@@ -16,7 +16,7 @@ CONFIG_DIR = PROJECT_ROOT / "configs"
 
 @dataclass(frozen=True)
 class ModelSettings:
-    model_path: Path = Path("~/.models/Phi-3.5-mini-instruct.Q4_K_M.gguf")
+    model_path: Path = Path("~/models/phi-2.Q4_K_M.gguf")
     n_ctx: int = 4096
     n_threads: int = 0
     n_batch: int = 256

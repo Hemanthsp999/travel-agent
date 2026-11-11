@@ -1,0 +1,21 @@
+GRAPH
+-----
+- __start__
+- observe
+- decide
+- hotel
+- flight
+- reobserve
+- respond
+- __end__
+EDGES
+  __start__ -> observe
+  decide -> flight
+  decide -> hotel
+  decide -> respond
+  flight -> reobserve
+  hotel -> reobserve
+  observe -> decide
+  reobserve -> observe
+  reobserve -> respond
+  respond -> __end__
